@@ -112,6 +112,49 @@ const CategoryVisibility = ({ API, onBack }) => {
     }
   };
 
+  const handleTypeSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingType) {
+        await axios.put(`${API}/visibility-types/${editingType.id}`, typeFormData);
+      } else {
+        await axios.post(`${API}/visibility-types`, typeFormData);
+      }
+      
+      setShowTypeModal(false);
+      setEditingType(null);
+      setTypeFormData({
+        name: '',
+        description: '',
+        active: true
+      });
+      fetchVisibilityTypes();
+    } catch (error) {
+      console.error('Error saving visibility type:', error);
+    }
+  };
+
+  const handleTypeEdit = (type) => {
+    setEditingType(type);
+    setTypeFormData({
+      name: type.name,
+      description: type.description || '',
+      active: type.active
+    });
+    setShowTypeModal(true);
+  };
+
+  const handleTypeDelete = async (typeId) => {
+    if (window.confirm('Are you sure you want to delete this visibility type?')) {
+      try {
+        await axios.delete(`${API}/visibility-types/${typeId}`);
+        fetchVisibilityTypes();
+      } catch (error) {
+        console.error('Error deleting visibility type:', error);
+      }
+    }
+  };
+
   const getCategoryName = (categoryId) => {
     const category = categories.find(c => c.id === categoryId);
     return category ? category.name : 'Unknown Category';
