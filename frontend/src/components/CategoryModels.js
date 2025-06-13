@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const CategoryModels = ({ API }) => {
+const CategoryModels = ({ API, onBack }) => {
   const [categoryModels, setCategoryModels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
