@@ -353,12 +353,14 @@ const SocialHandles = ({ API, onBack }) => {
         </div>
       </div>
 
-      {/* Modal Placeholder */}
+      {/* Modal for Add/Edit Social Handle */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Add Social Handle</h3>
+              <h3 className="text-xl font-bold text-gray-900">
+                {editingHandle ? 'Edit Social Handle' : 'Add New Social Handle'}
+              </h3>
               <button
                 onClick={() => setShowModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -368,12 +370,156 @@ const SocialHandles = ({ API, onBack }) => {
                 </svg>
               </button>
             </div>
-            <div className="text-center py-8">
-              <p className="text-gray-600">Social handle management form will be available soon.</p>
-              <button onClick={() => setShowModal(false)} className="btn-primary mt-4">
-                Close
-              </button>
-            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Field 1: Text Input for Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Social Platform Name *
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="form-input"
+                  placeholder="e.g., Instagram, Twitter, LinkedIn"
+                  required
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                  Enter the name of the social media platform
+                </p>
+              </div>
+
+              {/* Field 2: Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Platform Icon *
+                </label>
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-purple-400 transition-colors">
+                  <div className="space-y-1 text-center">
+                    {imagePreview ? (
+                      <div className="mb-4">
+                        <img 
+                          src={imagePreview} 
+                          alt="Preview" 
+                          className="mx-auto h-24 w-24 rounded-lg object-cover border border-gray-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImagePreview('');
+                            setFormData({ ...formData, icon_image: '' });
+                          }}
+                          className="mt-2 text-sm text-red-600 hover:text-red-800"
+                        >
+                          Remove Image
+                        </button>
+                      </div>
+                    ) : (
+                      <svg
+                        className="mx-auto h-12 w-12 text-gray-400"
+                        stroke="currentColor"
+                        fill="none"
+                        viewBox="0 0 48 48"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                    
+                    <div className="flex text-sm text-gray-600">
+                      <label
+                        htmlFor="file-upload"
+                        className="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500"
+                      >
+                        <span>{imagePreview ? 'Change image' : 'Upload a file'}</span>
+                        <input
+                          id="file-upload"
+                          name="file-upload"
+                          type="file"
+                          className="sr-only"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          required={!editingHandle && !formData.icon_image}
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                  </div>
+                </div>
+                <p className="mt-1 text-sm text-gray-500">
+                  Upload an icon image for the social media platform
+                </p>
+              </div>
+
+              {/* Additional Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Handle (Optional)</label>
+                  <input
+                    type="text"
+                    value={formData.handle}
+                    onChange={(e) => setFormData({ ...formData, handle: e.target.value })}
+                    className="form-input"
+                    placeholder="@username"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Followers (Optional)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.followers}
+                    onChange={(e) => setFormData({ ...formData, followers: parseInt(e.target.value) || 0 })}
+                    className="form-input"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Profile URL (Optional)</label>
+                <input
+                  type="url"
+                  value={formData.url}
+                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                  className="form-input"
+                  placeholder="https://..."
+                />
+              </div>
+
+              <div className="flex items-center">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.active}
+                    onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Active</span>
+                </label>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  {editingHandle ? 'Update Handle' : 'Create Handle'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
