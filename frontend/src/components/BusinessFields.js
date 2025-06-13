@@ -761,9 +761,9 @@ const BusinessFields = ({ API, onBack }) => {
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No existing fields</h3>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No field templates available</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  You need to create some fields first using "Manage Fields" → "Add new field"
+                  You need to create field templates first using "Manage Fields" → "Add new field"
                 </p>
                 <div className="mt-6">
                   <button
@@ -781,18 +781,18 @@ const BusinessFields = ({ API, onBack }) => {
               <form onSubmit={handleSimpleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Field Name *
+                    Business Field Name *
                   </label>
                   <input
                     type="text"
                     value={simpleFormData.name}
                     onChange={(e) => setSimpleFormData({ ...simpleFormData, name: e.target.value })}
                     className="form-input"
-                    placeholder="Enter field name"
+                    placeholder="e.g., Company Registration Number"
                     required
                   />
                   <p className="mt-1 text-sm text-gray-500">
-                    Enter a unique name for your new business field
+                    Enter a name for your business field instance
                   </p>
                 </div>
 
@@ -814,29 +814,49 @@ const BusinessFields = ({ API, onBack }) => {
                     ))}
                   </select>
                   <p className="mt-1 text-sm text-gray-500">
-                    Select an existing field to use as a template (type, category, and settings will be copied)
+                    Select a template from "Manage Fields" to base this business field on
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Initial Value (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={simpleFormData.value}
+                    onChange={(e) => setSimpleFormData({ ...simpleFormData, value: e.target.value })}
+                    className="form-input"
+                    placeholder="Enter initial value..."
+                  />
+                  <p className="mt-1 text-sm text-gray-500">
+                    You can set an initial value for this business field
                   </p>
                 </div>
 
                 {/* Preview selected field */}
                 {simpleFormData.selectedField && (
-                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                    <h4 className="text-sm font-medium text-purple-900 mb-2">Template Preview:</h4>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-blue-900 mb-2">Template Preview:</h4>
                     {(() => {
                       const selectedField = businessFields.find(f => f.id === simpleFormData.selectedField);
                       return selectedField ? (
                         <div className="space-y-1 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-purple-700">Type:</span>
-                            <span className="font-medium text-purple-900">{selectedField.type}</span>
+                            <span className="text-blue-700">Template:</span>
+                            <span className="font-medium text-blue-900">{selectedField.name}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-purple-700">Category:</span>
-                            <span className="font-medium text-purple-900">{getCategoryName(selectedField.category)}</span>
+                            <span className="text-blue-700">Type:</span>
+                            <span className="font-medium text-blue-900">{selectedField.type}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-purple-700">Required:</span>
-                            <span className="font-medium text-purple-900">{selectedField.required ? 'Yes' : 'No'}</span>
+                            <span className="text-blue-700">Category:</span>
+                            <span className="font-medium text-blue-900">{getCategoryName(selectedField.category)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-blue-700">Required:</span>
+                            <span className="font-medium text-blue-900">{selectedField.required ? 'Yes' : 'No'}</span>
                           </div>
                         </div>
                       ) : null;
@@ -853,11 +873,101 @@ const BusinessFields = ({ API, onBack }) => {
                     Cancel
                   </button>
                   <button type="submit" className="btn-primary">
-                    Create Field
+                    Create Business Field
                   </button>
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal for Edit Business Field Instance */}
+      {showModal && editingInstance && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Edit Business Field</h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleInstanceSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Field Name *
+                </label>
+                <input
+                  type="text"
+                  value={instanceFormData.name}
+                  onChange={(e) => setInstanceFormData({ ...instanceFormData, name: e.target.value })}
+                  className="form-input"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Template
+                </label>
+                <select
+                  value={instanceFormData.template_field_id}
+                  onChange={(e) => setInstanceFormData({ ...instanceFormData, template_field_id: e.target.value })}
+                  className="form-select"
+                  required
+                >
+                  <option value="">Select template...</option>
+                  {businessFields.map((field) => (
+                    <option key={field.id} value={field.id}>
+                      {field.name} ({field.type})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Value
+                </label>
+                <input
+                  type="text"
+                  value={instanceFormData.value}
+                  onChange={(e) => setInstanceFormData({ ...instanceFormData, value: e.target.value })}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="flex items-center">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={instanceFormData.active}
+                    onChange={(e) => setInstanceFormData({ ...instanceFormData, active: e.target.checked })}
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Active</span>
+                </label>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  Update Business Field
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
