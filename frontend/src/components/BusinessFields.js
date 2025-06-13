@@ -215,18 +215,11 @@ const BusinessFields = ({ API, onBack }) => {
           </button>
           <button
             onClick={() => {
-              setEditingField(null);
-              setFormData({
+              setSimpleFormData({
                 name: '',
-                type: 'text',
-                required: false,
-                category: 'general',
-                order: businessFields.length + 1,
-                validation: {},
-                options: [],
-                active: true
+                selectedField: businessFields.length > 0 ? businessFields[0].id : ''
               });
-              setShowModal(true);
+              setShowSimpleModal(true);
             }}
             className="btn-primary"
           >
