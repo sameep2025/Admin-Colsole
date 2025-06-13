@@ -186,7 +186,7 @@ const DisplayTypes = ({ API, onBack }) => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium opacity-90">Active Layouts</p>
+              <p className="text-sm font-medium opacity-90">Active Types</p>
               <p className="text-2xl font-bold">{displayTypes.filter(d => d.active).length}</p>
             </div>
           </div>
@@ -200,7 +200,7 @@ const DisplayTypes = ({ API, onBack }) => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium opacity-90">Responsive Types</p>
+              <p className="text-sm font-medium opacity-90">Responsive</p>
               <p className="text-2xl font-bold">{displayTypes.filter(d => d.responsive).length}</p>
             </div>
           </div>
@@ -214,92 +214,89 @@ const DisplayTypes = ({ API, onBack }) => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium opacity-90">Custom Layouts</p>
-              <p className="text-2xl font-bold">5</p>
+              <p className="text-sm font-medium opacity-90">With Properties</p>
+              <p className="text-2xl font-bold">{displayTypes.filter(d => d.properties && Object.keys(d.properties).length > 0).length}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Display Types Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {displayTypes.map((display) => (
-          <div key={display.id} className="bg-white rounded-2xl shadow-lg p-6 border border-purple-100 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <div className="p-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-lg font-semibold text-gray-900">{display.name}</h3>
-                  <p className="text-sm text-gray-600">{display.type}</p>
-                </div>
-              </div>
-              <span className={`badge ${display.active ? 'badge-visible' : 'badge-hidden'}`}>
-                {display.active ? 'Active' : 'Inactive'}
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Columns:</span>
-                <span className="font-medium text-purple-600">{display.columns}</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Responsive:</span>
-                <span className={`badge ${display.responsive ? 'badge-visible' : 'badge-hidden'}`}>
-                  {display.responsive ? 'Yes' : 'No'}
-                </span>
-              </div>
-
-              <div className="pt-2">
-                <span className="text-sm text-gray-600 mb-2 block">Properties:</span>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="text-xs bg-purple-50 rounded p-2">
-                    <span className="font-medium text-purple-700">Spacing:</span>
-                    <span className="text-gray-600 ml-1">{display.properties.spacing}</span>
-                  </div>
-                  <div className="text-xs bg-purple-50 rounded p-2">
-                    <span className="font-medium text-purple-700">Align:</span>
-                    <span className="text-gray-600 ml-1">{display.properties.alignment}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-purple-100">
-              <div className="flex space-x-2">
-                <button className="flex-1 btn-secondary text-sm">
-                  Edit
-                </button>
-                <button className="flex-1 btn-primary text-sm">
-                  Preview
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Preview Section */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 border border-purple-100">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Layout Preview</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="border-2 border-dashed border-purple-200 rounded-lg p-4 text-center">
-            <div className="bg-purple-100 rounded-lg h-20 mb-3"></div>
-            <p className="text-sm text-gray-600">Grid Layout Preview</p>
-          </div>
-          <div className="border-2 border-dashed border-purple-200 rounded-lg p-4 text-center">
-            <div className="bg-purple-100 rounded-lg h-20 mb-3"></div>
-            <p className="text-sm text-gray-600">List Layout Preview</p>
-          </div>
-          <div className="border-2 border-dashed border-purple-200 rounded-lg p-4 text-center">
-            <div className="bg-purple-100 rounded-lg h-20 mb-3"></div>
-            <p className="text-sm text-gray-600">Carousel Preview</p>
-          </div>
+      {/* Display Types Table */}
+      <div className="table-container">
+        <div className="table-header">
+          <h3 className="text-lg font-semibold text-gray-900">Display Types</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-purple-100">
+            <thead className="bg-purple-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Description</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Category</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Responsive</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Created</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-purple-50">
+              {displayTypes.map((type) => (
+                <tr key={type.id} className="table-row">
+                  <td className="table-cell font-medium">{type.name}</td>
+                  <td className="table-cell text-gray-600">{type.description || 'No description'}</td>
+                  <td className="table-cell">
+                    {type.type_category ? (
+                      <span className="badge badge-visible capitalize">{type.type_category}</span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="table-cell">
+                    <span className={`badge ${type.responsive ? 'badge-visible' : 'badge-hidden'}`}>
+                      {type.responsive ? 'Yes' : 'No'}
+                    </span>
+                  </td>
+                  <td className="table-cell">
+                    <span className={`badge ${type.active ? 'badge-visible' : 'badge-hidden'}`}>
+                      {type.active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td className="table-cell text-gray-600">
+                    {new Date(type.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="table-cell">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEdit(type)}
+                        className="text-purple-600 hover:text-purple-800 transition-colors"
+                        title="Edit Type"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(type.id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                        title="Delete Type"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {displayTypes.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="text-center py-12 text-gray-500">
+                    No display types found. Create your first display type to get started.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
