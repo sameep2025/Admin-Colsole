@@ -513,7 +513,7 @@ const BusinessFields = ({ API, onBack }) => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-gray-900">
-                {editingField ? 'Edit Business Field' : 'Add New Business Field'}
+                {editingField ? 'Edit Business Field' : 'Add New Field'}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
@@ -617,6 +617,128 @@ const BusinessFields = ({ API, onBack }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Simple Modal for Add New Business Fields */}
+      {showSimpleModal && (
+        <div className="modal-overlay" onClick={() => setShowSimpleModal(false)}>
+          <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Add New Business Field</h3>
+              <button
+                onClick={() => setShowSimpleModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>
+              </button>
+            </div>
+
+            {businessFields.length === 0 ? (
+              <div className="text-center py-8">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No existing fields</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  You need to create some fields first using "Manage Fields" → "Add new field"
+                </p>
+                <div className="mt-6">
+                  <button
+                    onClick={() => {
+                      setShowSimpleModal(false);
+                      setActiveView('manage');
+                    }}
+                    className="btn-primary"
+                  >
+                    Go to Manage Fields
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSimpleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Field Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={simpleFormData.name}
+                    onChange={(e) => setSimpleFormData({ ...simpleFormData, name: e.target.value })}
+                    className="form-input"
+                    placeholder="Enter field name"
+                    required
+                  />
+                  <p className="mt-1 text-sm text-gray-500">
+                    Enter a unique name for your new business field
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Field Template *
+                  </label>
+                  <select
+                    value={simpleFormData.selectedField}
+                    onChange={(e) => setSimpleFormData({ ...simpleFormData, selectedField: e.target.value })}
+                    className="form-select"
+                    required
+                  >
+                    <option value="">Choose a field template...</option>
+                    {businessFields.map((field) => (
+                      <option key={field.id} value={field.id}>
+                        {field.name} ({field.type} - {getCategoryName(field.category)})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Select an existing field to use as a template (type, category, and settings will be copied)
+                  </p>
+                </div>
+
+                {/* Preview selected field */}
+                {simpleFormData.selectedField && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-purple-900 mb-2">Template Preview:</h4>
+                    {(() => {
+                      const selectedField = businessFields.find(f => f.id === simpleFormData.selectedField);
+                      return selectedField ? (
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-purple-700">Type:</span>
+                            <span className="font-medium text-purple-900">{selectedField.type}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-purple-700">Category:</span>
+                            <span className="font-medium text-purple-900">{getCategoryName(selectedField.category)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-purple-700">Required:</span>
+                            <span className="font-medium text-purple-900">{selectedField.required ? 'Yes' : 'No'}</span>
+                          </div>
+                        </div>
+                      ) : null;
+                    })()}
+                  </div>
+                )}
+
+                <div className="flex justify-end space-x-3 pt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowSimpleModal(false)}
+                    className="btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-primary">
+                    Create Field
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
