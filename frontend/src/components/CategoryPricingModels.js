@@ -190,8 +190,8 @@ const CategoryPricingModels = ({ API, onBack }) => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium opacity-90">Active Plans</p>
-              <p className="text-2xl font-bold">{pricingModels.filter(p => p.type === 'recurring').length}</p>
+              <p className="text-sm font-medium opacity-90">Active Models</p>
+              <p className="text-2xl font-bold">{pricingModels.filter(p => p.active).length}</p>
             </div>
           </div>
         </div>
@@ -204,8 +204,8 @@ const CategoryPricingModels = ({ API, onBack }) => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium opacity-90">Revenue Models</p>
-              <p className="text-2xl font-bold">3</p>
+              <p className="text-sm font-medium opacity-90">With Pricing</p>
+              <p className="text-2xl font-bold">{pricingModels.filter(p => p.price && p.price > 0).length}</p>
             </div>
           </div>
         </div>
@@ -218,27 +218,32 @@ const CategoryPricingModels = ({ API, onBack }) => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium opacity-90">Growth Rate</p>
-              <p className="text-2xl font-bold">+15%</p>
+              <p className="text-sm font-medium opacity-90">Avg Price</p>
+              <p className="text-2xl font-bold">
+                ${pricingModels.length > 0 ? 
+                  (pricingModels.reduce((acc, p) => acc + (p.price || 0), 0) / pricingModels.length).toFixed(0) : 
+                  '0'}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Preview Table */}
+      {/* Pricing Models Table */}
       <div className="table-container">
         <div className="table-header">
-          <h3 className="text-lg font-semibold text-gray-900">Pricing Models Preview</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Pricing Models</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-purple-100">
             <thead className="bg-purple-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Description</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Price</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Interval</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Features</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Created</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -246,31 +251,47 @@ const CategoryPricingModels = ({ API, onBack }) => {
               {pricingModels.map((model) => (
                 <tr key={model.id} className="table-row">
                   <td className="table-cell font-medium">{model.name}</td>
+                  <td className="table-cell text-gray-600">{model.description || 'No description'}</td>
                   <td className="table-cell">
-                    <span className="badge badge-visible capitalize">{model.type}</span>
+                    {model.price ? (
+                      <span className="font-medium text-green-600">
+                        ${model.price} {model.currency}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">No price set</span>
+                    )}
                   </td>
-                  <td className="table-cell">${model.price} {model.currency}</td>
-                  <td className="table-cell capitalize">{model.interval}</td>
                   <td className="table-cell">
-                    <div className="flex flex-wrap gap-1">
-                      {model.features.slice(0, 2).map((feature, index) => (
-                        <span key={index} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">
-                          {feature}
-                        </span>
-                      ))}
-                      {model.features.length > 2 && (
-                        <span className="text-xs text-gray-500">+{model.features.length - 2} more</span>
-                      )}
-                    </div>
+                    {model.interval ? (
+                      <span className="badge badge-visible capitalize">{model.interval}</span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="table-cell">
+                    <span className={`badge ${model.active ? 'badge-visible' : 'badge-hidden'}`}>
+                      {model.active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td className="table-cell text-gray-600">
+                    {new Date(model.created_at).toLocaleDateString()}
                   </td>
                   <td className="table-cell">
                     <div className="flex space-x-2">
-                      <button className="text-purple-600 hover:text-purple-800 transition-colors">
+                      <button
+                        onClick={() => handleEdit(model)}
+                        className="text-purple-600 hover:text-purple-800 transition-colors"
+                        title="Edit Model"
+                      >
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
                         </svg>
                       </button>
-                      <button className="text-red-600 hover:text-red-800 transition-colors">
+                      <button
+                        onClick={() => handleDelete(model.id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                        title="Delete Model"
+                      >
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                         </svg>
@@ -279,6 +300,13 @@ const CategoryPricingModels = ({ API, onBack }) => {
                   </td>
                 </tr>
               ))}
+              {pricingModels.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="text-center py-12 text-gray-500">
+                    No pricing models found. Create your first model to get started.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
