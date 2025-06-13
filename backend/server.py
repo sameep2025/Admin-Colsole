@@ -151,6 +151,30 @@ class BusinessFieldUpdate(BaseModel):
     options: Optional[List[str]] = None
     active: Optional[bool] = None
 
+class BusinessFieldInstance(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    template_field_id: str  # References a BusinessField (template)
+    value: Optional[str] = None
+    custom_properties: Dict[str, Any] = {}
+    active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class BusinessFieldInstanceCreate(BaseModel):
+    name: str
+    template_field_id: str
+    value: Optional[str] = None
+    custom_properties: Dict[str, Any] = {}
+    active: bool = True
+
+class BusinessFieldInstanceUpdate(BaseModel):
+    name: Optional[str] = None
+    template_field_id: Optional[str] = None
+    value: Optional[str] = None
+    custom_properties: Optional[Dict[str, Any]] = None
+    active: Optional[bool] = None
+
 # Category Model Routes
 @api_router.post("/category-models", response_model=CategoryModel)
 async def create_category_model(model_data: CategoryModelCreate):
