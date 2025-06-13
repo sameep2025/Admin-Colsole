@@ -279,6 +279,49 @@ async def delete_category_visibility(visibility_id: str):
         raise HTTPException(status_code=404, detail="Category visibility setting not found")
     return {"message": "Category visibility setting deleted successfully"}
 
+# Business Fields Routes
+@api_router.post("/business-fields", response_model=BusinessField)
+async def create_business_field(field_data: BusinessFieldCreate):
+    field_dict = field_data.dict()
+    field_obj = BusinessField(**field_dict)
+    await db.business_fields.insert_one(field_obj.dict())
+    return field_obj
+
+@api_router.get("/business-fields", response_model=List[BusinessField])
+async def get_business_fields():
+    fields = await db.business_fields.find().sort("order", 1).to_list(1000)
+    return [BusinessField(**field) for field in fields]
+
+@api_router.get("/business-fields/{field_id}", response_model=BusinessField)
+async def get_business_field(field_id: str):
+    field = await db.business_fields.find_one({"id": field_id})
+    if not field:
+        raise HTTPException(status_code=404, detail="Business field not found")
+    return BusinessField(**field)
+
+@api_router.put("/business-fields/{field_id}", response_model=BusinessField)
+async def update_business_field(field_id: str, field_data: BusinessFieldUpdate):
+    update_dict = {k: v for k, v in field_data.dict().items() if v is not None}
+    update_dict["updated_at"] = datetime.utcnow()
+    
+    result = await db.business_fields.update_one(
+        {"id": field_id}, 
+        {"$set": update_dict}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Business field not found")
+    
+    updated_field = await db.business_fields.find_one({"id": field_id})
+    return BusinessField(**updated_field)
+
+@api_router.delete("/business-fields/{field_id}")
+async def delete_business_field(field_id: str):
+    result = await db.business_fields.delete_one({"id": field_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Business field not found")
+    return {"message": "Business field deleted successfully"}
+
 # Utility Routes
 @api_router.get("/")
 async def root():
