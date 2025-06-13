@@ -228,6 +228,23 @@ const CategoryVisibility = ({ API, onBack }) => {
             </button>
           )}
           <button
+            onClick={() => {
+              setEditingType(null);
+              setTypeFormData({
+                name: '',
+                description: '',
+                active: true
+              });
+              setShowTypeModal(true);
+            }}
+            className="btn-secondary"
+          >
+            <svg className="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+            </svg>
+            Add new visibility type
+          </button>
+          <button
             onClick={() => setShowModal(true)}
             className="btn-primary"
           >
