@@ -394,6 +394,49 @@ async def delete_visibility_type(type_id: str):
         raise HTTPException(status_code=404, detail="Visibility type not found")
     return {"message": "Visibility type deleted successfully"}
 
+# Pricing Models Routes
+@api_router.post("/pricing-models", response_model=PricingModel)
+async def create_pricing_model(model_data: PricingModelCreate):
+    model_dict = model_data.dict()
+    model_obj = PricingModel(**model_dict)
+    await db.pricing_models.insert_one(model_obj.dict())
+    return model_obj
+
+@api_router.get("/pricing-models", response_model=List[PricingModel])
+async def get_pricing_models():
+    models = await db.pricing_models.find().sort("created_at", -1).to_list(1000)
+    return [PricingModel(**model) for model in models]
+
+@api_router.get("/pricing-models/{model_id}", response_model=PricingModel)
+async def get_pricing_model(model_id: str):
+    model = await db.pricing_models.find_one({"id": model_id})
+    if not model:
+        raise HTTPException(status_code=404, detail="Pricing model not found")
+    return PricingModel(**model)
+
+@api_router.put("/pricing-models/{model_id}", response_model=PricingModel)
+async def update_pricing_model(model_id: str, model_data: PricingModelUpdate):
+    update_dict = {k: v for k, v in model_data.dict().items() if v is not None}
+    update_dict["updated_at"] = datetime.utcnow()
+    
+    result = await db.pricing_models.update_one(
+        {"id": model_id}, 
+        {"$set": update_dict}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Pricing model not found")
+    
+    updated_model = await db.pricing_models.find_one({"id": model_id})
+    return PricingModel(**updated_model)
+
+@api_router.delete("/pricing-models/{model_id}")
+async def delete_pricing_model(model_id: str):
+    result = await db.pricing_models.delete_one({"id": model_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Pricing model not found")
+    return {"message": "Pricing model deleted successfully"}
+
 # Business Fields Routes
 @api_router.post("/business-fields", response_model=BusinessField)
 async def create_business_field(field_data: BusinessFieldCreate):
