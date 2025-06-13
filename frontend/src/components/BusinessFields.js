@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const BusinessFields = ({ API, onBack }) => {
-  const [businessFields, setBusinessFields] = useState([]);
+  const [businessFields, setBusinessFields] = useState([]); // Field templates
+  const [businessFieldInstances, setBusinessFieldInstances] = useState([]); // Actual business fields
   const [loading, setLoading] = useState(false);
-  const [activeView, setActiveView] = useState('overview'); // 'overview', 'manage', 'add'
+  const [activeView, setActiveView] = useState('overview'); // 'overview', 'manage', 'instances'
   const [showModal, setShowModal] = useState(false);
   const [showSimpleModal, setShowSimpleModal] = useState(false); // For simple Add New Business Fields
   const [editingField, setEditingField] = useState(null);
+  const [editingInstance, setEditingInstance] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     type: 'text',
@@ -20,7 +22,15 @@ const BusinessFields = ({ API, onBack }) => {
   });
   const [simpleFormData, setSimpleFormData] = useState({
     name: '',
-    selectedField: ''
+    selectedField: '',
+    value: ''
+  });
+  const [instanceFormData, setInstanceFormData] = useState({
+    name: '',
+    template_field_id: '',
+    value: '',
+    custom_properties: {},
+    active: true
   });
 
   const fieldTypes = [
