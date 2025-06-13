@@ -346,6 +346,54 @@ async def delete_business_field(field_id: str):
         raise HTTPException(status_code=404, detail="Business field not found")
     return {"message": "Business field deleted successfully"}
 
+# Business Field Instances Routes (Actual Business Fields Data)
+@api_router.post("/business-field-instances", response_model=BusinessFieldInstance)
+async def create_business_field_instance(instance_data: BusinessFieldInstanceCreate):
+    # Verify the template field exists
+    template_field = await db.business_fields.find_one({"id": instance_data.template_field_id})
+    if not template_field:
+        raise HTTPException(status_code=404, detail="Template field not found")
+    
+    instance_dict = instance_data.dict()
+    instance_obj = BusinessFieldInstance(**instance_dict)
+    await db.business_field_instances.insert_one(instance_obj.dict())
+    return instance_obj
+
+@api_router.get("/business-field-instances", response_model=List[BusinessFieldInstance])
+async def get_business_field_instances():
+    instances = await db.business_field_instances.find().sort("created_at", -1).to_list(1000)
+    return [BusinessFieldInstance(**instance) for instance in instances]
+
+@api_router.get("/business-field-instances/{instance_id}", response_model=BusinessFieldInstance)
+async def get_business_field_instance(instance_id: str):
+    instance = await db.business_field_instances.find_one({"id": instance_id})
+    if not instance:
+        raise HTTPException(status_code=404, detail="Business field instance not found")
+    return BusinessFieldInstance(**instance)
+
+@api_router.put("/business-field-instances/{instance_id}", response_model=BusinessFieldInstance)
+async def update_business_field_instance(instance_id: str, instance_data: BusinessFieldInstanceUpdate):
+    update_dict = {k: v for k, v in instance_data.dict().items() if v is not None}
+    update_dict["updated_at"] = datetime.utcnow()
+    
+    result = await db.business_field_instances.update_one(
+        {"id": instance_id}, 
+        {"$set": update_dict}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Business field instance not found")
+    
+    updated_instance = await db.business_field_instances.find_one({"id": instance_id})
+    return BusinessFieldInstance(**updated_instance)
+
+@api_router.delete("/business-field-instances/{instance_id}")
+async def delete_business_field_instance(instance_id: str):
+    result = await db.business_field_instances.delete_one({"id": instance_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Business field instance not found")
+    return {"message": "Business field instance deleted successfully"}
+
 # Utility Routes
 @api_router.get("/")
 async def root():
