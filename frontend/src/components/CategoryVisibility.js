@@ -494,7 +494,85 @@ const CategoryVisibility = ({ API, onBack }) => {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modal for Add/Edit Visibility Type */}
+      {showTypeModal && (
+        <div className="modal-overlay" onClick={() => setShowTypeModal(false)}>
+          <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-900">
+                {editingType ? 'Edit Visibility Type' : 'Add New Visibility Type'}
+              </h3>
+              <button
+                onClick={() => setShowTypeModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleTypeSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Type Name *
+                </label>
+                <input
+                  type="text"
+                  value={typeFormData.name}
+                  onChange={(e) => setTypeFormData({ ...typeFormData, name: e.target.value })}
+                  className="form-input"
+                  placeholder="Enter visibility type name"
+                  required
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                  Enter a unique name for the visibility type
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description (Optional)
+                </label>
+                <textarea
+                  value={typeFormData.description}
+                  onChange={(e) => setTypeFormData({ ...typeFormData, description: e.target.value })}
+                  className="form-textarea"
+                  rows="3"
+                  placeholder="Enter description for this visibility type"
+                />
+              </div>
+
+              <div className="flex items-center">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={typeFormData.active}
+                    onChange={(e) => setTypeFormData({ ...typeFormData, active: e.target.checked })}
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Active</span>
+                </label>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowTypeModal(false)}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  {editingType ? 'Update Type' : 'Create Type'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for Add/Edit Visibility Rule */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
