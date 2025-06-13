@@ -123,21 +123,34 @@ const Categories = ({ API }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+      {/* Update existing components to include onBack prop */}
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-3xl font-bold text-gray-900">Manage Categories</h2>
           <p className="mt-2 text-gray-600">Create, edit, and organize your categories</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="btn-primary"
-        >
-          <svg className="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-          </svg>
-          Add Category
-        </button>
+        <div className="flex space-x-3">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="btn-secondary"
+            >
+              <svg className="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+              </svg>
+              Back to Home
+            </button>
+          )}
+          <button
+            onClick={() => setShowModal(true)}
+            className="btn-primary"
+          >
+            <svg className="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+            </svg>
+            Add Category
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
