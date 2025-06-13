@@ -131,35 +131,73 @@ const BusinessFields = ({ API, onBack }) => {
   const handleSimpleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Find the selected field to copy its properties
-      const selectedField = businessFields.find(field => field.id === simpleFormData.selectedField);
-      if (!selectedField) {
-        alert('Please select a field template');
-        return;
-      }
-
-      // Create new field based on selected field template but with new name
-      const newFieldData = {
+      // Create new business field instance using template
+      const newInstanceData = {
         name: simpleFormData.name,
-        type: selectedField.type,
-        required: selectedField.required,
-        category: selectedField.category,
-        order: businessFields.length + 1,
-        validation: selectedField.validation || {},
-        options: selectedField.options || [],
+        template_field_id: simpleFormData.selectedField,
+        value: simpleFormData.value || '',
+        custom_properties: {},
         active: true
       };
 
-      await axios.post(`${API}/business-fields`, newFieldData);
+      await axios.post(`${API}/business-field-instances`, newInstanceData);
       
       setShowSimpleModal(false);
       setSimpleFormData({
         name: '',
-        selectedField: ''
+        selectedField: '',
+        value: ''
       });
-      fetchBusinessFields();
+      fetchBusinessFieldInstances();
     } catch (error) {
-      console.error('Error saving business field:', error);
+      console.error('Error saving business field instance:', error);
+    }
+  };
+
+  const handleInstanceEdit = (instance) => {
+    setEditingInstance(instance);
+    setInstanceFormData({
+      name: instance.name,
+      template_field_id: instance.template_field_id,
+      value: instance.value || '',
+      custom_properties: instance.custom_properties || {},
+      active: instance.active
+    });
+    setShowModal(true);
+  };
+
+  const handleInstanceSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingInstance) {
+        await axios.put(`${API}/business-field-instances/${editingInstance.id}`, instanceFormData);
+      } else {
+        await axios.post(`${API}/business-field-instances`, instanceFormData);
+      }
+      
+      setShowModal(false);
+      setEditingInstance(null);
+      setInstanceFormData({
+        name: '',
+        template_field_id: '',
+        value: '',
+        custom_properties: {},
+        active: true
+      });
+      fetchBusinessFieldInstances();
+    } catch (error) {
+      console.error('Error saving business field instance:', error);
+    }
+  };
+
+  const handleInstanceDelete = async (instanceId) => {
+    if (window.confirm('Are you sure you want to delete this business field?')) {
+      try {
+        await axios.delete(`${API}/business-field-instances/${instanceId}`);
+        fetchBusinessFieldInstances();
+      } catch (error) {
+        console.error('Error deleting business field instance:', error);
+      }
     }
   };
 
