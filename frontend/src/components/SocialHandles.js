@@ -207,7 +207,7 @@ const SocialHandles = ({ API, onBack }) => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium opacity-90">Connected Accounts</p>
+              <p className="text-sm font-medium opacity-90">Total Handles</p>
               <p className="text-2xl font-bold">{socialHandles.length}</p>
             </div>
           </div>
@@ -236,7 +236,7 @@ const SocialHandles = ({ API, onBack }) => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium opacity-90">Total Followers</p>
-              <p className="text-2xl font-bold">{socialHandles.reduce((acc, h) => acc + h.followers, 0).toLocaleString()}</p>
+              <p className="text-2xl font-bold">{socialHandles.reduce((acc, h) => acc + (h.followers || 0), 0).toLocaleString()}</p>
             </div>
           </div>
         </div>
@@ -245,64 +245,112 @@ const SocialHandles = ({ API, onBack }) => {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z" />
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium opacity-90">Engagement Rate</p>
-              <p className="text-2xl font-bold">4.2%</p>
+              <p className="text-sm font-medium opacity-90">With Icons</p>
+              <p className="text-2xl font-bold">{socialHandles.filter(h => h.icon_image).length}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Social Handles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {socialHandles.map((handle) => (
-          <div key={handle.id} className="bg-white rounded-2xl shadow-lg p-6 border border-purple-100 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <div className="p-3 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-lg font-semibold text-gray-900">{handle.platform}</h3>
-                  <p className="text-sm text-gray-600">{handle.handle}</p>
-                </div>
-              </div>
-              <span className={`badge ${handle.active ? 'badge-visible' : 'badge-hidden'}`}>
-                {handle.active ? 'Active' : 'Inactive'}
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Followers:</span>
-                <span className="font-medium text-purple-600">{handle.followers.toLocaleString()}</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">URL:</span>
-                <a href={handle.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 truncate">
-                  View Profile
-                </a>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-purple-100">
-              <div className="flex space-x-2">
-                <button className="flex-1 btn-secondary text-sm">
-                  Edit
-                </button>
-                <button className="flex-1 btn-primary text-sm">
-                  Sync
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+      {/* Social Handles Table */}
+      <div className="table-container">
+        <div className="table-header">
+          <h3 className="text-lg font-semibold text-gray-900">Social Handles</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-purple-100">
+            <thead className="bg-purple-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Icon</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Handle</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">URL</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Followers</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Created</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-purple-50">
+              {socialHandles.map((handle) => (
+                <tr key={handle.id} className="table-row">
+                  <td className="table-cell">
+                    {handle.icon_image ? (
+                      <img 
+                        src={handle.icon_image} 
+                        alt={handle.name}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z" />
+                        </svg>
+                      </div>
+                    )}
+                  </td>
+                  <td className="table-cell font-medium">{handle.name}</td>
+                  <td className="table-cell text-gray-600">{handle.handle || '-'}</td>
+                  <td className="table-cell">
+                    {handle.url ? (
+                      <a href={handle.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 truncate max-w-32 block">
+                        View Profile
+                      </a>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="table-cell">
+                    <span className="font-medium text-purple-600">
+                      {(handle.followers || 0).toLocaleString()}
+                    </span>
+                  </td>
+                  <td className="table-cell">
+                    <span className={`badge ${handle.active ? 'badge-visible' : 'badge-hidden'}`}>
+                      {handle.active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td className="table-cell text-gray-600">
+                    {new Date(handle.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="table-cell">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEdit(handle)}
+                        className="text-purple-600 hover:text-purple-800 transition-colors"
+                        title="Edit Handle"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(handle.id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                        title="Delete Handle"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {socialHandles.length === 0 && (
+                <tr>
+                  <td colSpan="8" className="text-center py-12 text-gray-500">
+                    No social handles found. Create your first handle to get started.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Modal Placeholder */}
