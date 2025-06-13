@@ -152,16 +152,18 @@ backend:
 
   - task: "Business Fields CRUD API"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented complete CRUD API for business fields with field types, categories, validation rules, and ordering. Added BusinessField, BusinessFieldCreate, and BusinessFieldUpdate models with full CRUD endpoints at /api/business-fields"
-        comment: "Successfully tested all CRUD operations for category visibility settings. Created visibility settings with scheduled dates and rules, retrieved all visibility settings, retrieved specific settings by ID, updated settings with new visibility status and rules, and deleted settings. All endpoints return correct status codes and data. Date handling for scheduled visibility is working correctly."
+      - working: true
+        agent: "testing"
+        comment: "Successfully tested all CRUD operations for business fields. Created fields with different types (text, number, boolean, date, email, url, textarea), tested fields with different categories (general, basic_info, legal_info, financial_info, contact_info), verified field validation rules, tested field ordering and sorting, and confirmed field activation/deactivation functionality. All endpoints return correct status codes and data. Field ordering by the 'order' field works correctly. Field validation for different types is enforced properly. Error handling for non-existent resources and invalid data is working as expected."
 
   - task: "Database Models and Schema"
     implemented: true
