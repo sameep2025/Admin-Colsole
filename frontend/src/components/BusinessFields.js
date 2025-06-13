@@ -6,6 +6,7 @@ const BusinessFields = ({ API, onBack }) => {
   const [loading, setLoading] = useState(false);
   const [activeView, setActiveView] = useState('overview'); // 'overview', 'manage', 'add'
   const [showModal, setShowModal] = useState(false);
+  const [showSimpleModal, setShowSimpleModal] = useState(false); // For simple Add New Business Fields
   const [editingField, setEditingField] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -16,6 +17,10 @@ const BusinessFields = ({ API, onBack }) => {
     validation: {},
     options: [],
     active: true
+  });
+  const [simpleFormData, setSimpleFormData] = useState({
+    name: '',
+    selectedField: ''
   });
 
   const fieldTypes = [
