@@ -5,12 +5,29 @@ const CategoryPricingModels = ({ API, onBack }) => {
   const [pricingModels, setPricingModels] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [editingModel, setEditingModel] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    currency: 'USD',
+    interval: '',
+    features: [],
+    active: true
+  });
 
-  // Placeholder data for demonstration
   useEffect(() => {
-    // Simulate loading
-    setLoading(true);
-    setTimeout(() => {
+    fetchPricingModels();
+  }, []);
+
+  const fetchPricingModels = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/pricing-models`);
+      setPricingModels(response.data);
+    } catch (error) {
+      console.error('Error fetching pricing models:', error);
+      // Set fallback data if API fails
       setPricingModels([
         {
           id: '1',
@@ -33,9 +50,67 @@ const CategoryPricingModels = ({ API, onBack }) => {
           created_at: new Date().toISOString()
         }
       ]);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const submitData = {
+        ...formData,
+        price: formData.price ? parseFloat(formData.price) : null,
+        features: Array.isArray(formData.features) ? formData.features : []
+      };
+
+      if (editingModel) {
+        await axios.put(`${API}/pricing-models/${editingModel.id}`, submitData);
+      } else {
+        await axios.post(`${API}/pricing-models`, submitData);
+      }
+      
+      setShowModal(false);
+      setEditingModel(null);
+      setFormData({
+        name: '',
+        description: '',
+        price: '',
+        currency: 'USD',
+        interval: '',
+        features: [],
+        active: true
+      });
+      fetchPricingModels();
+    } catch (error) {
+      console.error('Error saving pricing model:', error);
+    }
+  };
+
+  const handleEdit = (model) => {
+    setEditingModel(model);
+    setFormData({
+      name: model.name,
+      description: model.description || '',
+      price: model.price || '',
+      currency: model.currency || 'USD',
+      interval: model.interval || '',
+      features: model.features || [],
+      active: model.active
+    });
+    setShowModal(true);
+  };
+
+  const handleDelete = async (modelId) => {
+    if (window.confirm('Are you sure you want to delete this pricing model?')) {
+      try {
+        await axios.delete(`${API}/pricing-models/${modelId}`);
+        fetchPricingModels();
+      } catch (error) {
+        console.error('Error deleting pricing model:', error);
+      }
+    }
+  };
 
   if (loading) {
     return (
