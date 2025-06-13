@@ -118,6 +118,24 @@ class CategoryVisibilityUpdate(BaseModel):
     end_date: Optional[datetime] = None
     rules: Optional[Dict[str, Any]] = None
 
+class VisibilityType(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: Optional[str] = None
+    active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class VisibilityTypeCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    active: bool = True
+
+class VisibilityTypeUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    active: Optional[bool] = None
+
 class BusinessField(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
