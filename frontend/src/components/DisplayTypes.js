@@ -5,17 +5,33 @@ const DisplayTypes = ({ API, onBack }) => {
   const [displayTypes, setDisplayTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [editingType, setEditingType] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    type_category: '',
+    properties: {},
+    responsive: true,
+    active: true
+  });
 
-  // Placeholder data for demonstration
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
+    fetchDisplayTypes();
+  }, []);
+
+  const fetchDisplayTypes = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/display-types`);
+      setDisplayTypes(response.data);
+    } catch (error) {
+      console.error('Error fetching display types:', error);
+      // Set fallback data if API fails
       setDisplayTypes([
         {
           id: '1',
           name: 'Grid Layout',
-          type: 'grid',
-          columns: 3,
+          type_category: 'grid',
           responsive: true,
           properties: {
             spacing: 'medium',
@@ -28,8 +44,7 @@ const DisplayTypes = ({ API, onBack }) => {
         {
           id: '2',
           name: 'List View',
-          type: 'list',
-          columns: 1,
+          type_category: 'list',
           responsive: true,
           properties: {
             spacing: 'compact',
@@ -38,26 +53,61 @@ const DisplayTypes = ({ API, onBack }) => {
           },
           active: true,
           created_at: new Date().toISOString()
-        },
-        {
-          id: '3',
-          name: 'Card Carousel',
-          type: 'carousel',
-          columns: 4,
-          responsive: true,
-          properties: {
-            spacing: 'large',
-            alignment: 'center',
-            animation: 'carousel',
-            autoplay: true
-          },
-          active: false,
-          created_at: new Date().toISOString()
         }
       ]);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingType) {
+        await axios.put(`${API}/display-types/${editingType.id}`, formData);
+      } else {
+        await axios.post(`${API}/display-types`, formData);
+      }
+      
+      setShowModal(false);
+      setEditingType(null);
+      setFormData({
+        name: '',
+        description: '',
+        type_category: '',
+        properties: {},
+        responsive: true,
+        active: true
+      });
+      fetchDisplayTypes();
+    } catch (error) {
+      console.error('Error saving display type:', error);
+    }
+  };
+
+  const handleEdit = (type) => {
+    setEditingType(type);
+    setFormData({
+      name: type.name,
+      description: type.description || '',
+      type_category: type.type_category || '',
+      properties: type.properties || {},
+      responsive: type.responsive,
+      active: type.active
+    });
+    setShowModal(true);
+  };
+
+  const handleDelete = async (typeId) => {
+    if (window.confirm('Are you sure you want to delete this display type?')) {
+      try {
+        await axios.delete(`${API}/display-types/${typeId}`);
+        fetchDisplayTypes();
+      } catch (error) {
+        console.error('Error deleting display type:', error);
+      }
+    }
+  };
 
   if (loading) {
     return (
