@@ -53,6 +53,7 @@ const BusinessFields = ({ API, onBack }) => {
 
   useEffect(() => {
     fetchBusinessFields();
+    fetchBusinessFieldInstances();
   }, []);
 
   const fetchBusinessFields = async () => {
@@ -66,7 +67,7 @@ const BusinessFields = ({ API, onBack }) => {
       setBusinessFields([
         {
           id: '1',
-          name: 'Company Name',
+          name: 'Company Name Template',
           type: 'text',
           required: true,
           category: 'basic_info',
@@ -76,7 +77,7 @@ const BusinessFields = ({ API, onBack }) => {
         },
         {
           id: '2',
-          name: 'Business Registration Number',
+          name: 'Registration Number Template',
           type: 'text',
           required: true,
           category: 'legal_info',
@@ -87,6 +88,16 @@ const BusinessFields = ({ API, onBack }) => {
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBusinessFieldInstances = async () => {
+    try {
+      const response = await axios.get(`${API}/business-field-instances`);
+      setBusinessFieldInstances(response.data);
+    } catch (error) {
+      console.error('Error fetching business field instances:', error);
+      setBusinessFieldInstances([]);
     }
   };
 
