@@ -360,6 +360,71 @@ const CategoryVisibility = ({ API, onBack }) => {
         </div>
       </div>
 
+      {/* Visibility Types Table */}
+      <div className="table-container">
+        <div className="table-header">
+          <h3 className="text-lg font-semibold text-gray-900">Visibility Types</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-purple-100">
+            <thead className="bg-purple-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Description</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Created</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-purple-50">
+              {visibilityTypes.map((type) => (
+                <tr key={type.id} className="table-row">
+                  <td className="table-cell font-medium">{type.name}</td>
+                  <td className="table-cell text-gray-600">{type.description || 'No description'}</td>
+                  <td className="table-cell">
+                    <span className={`badge ${type.active ? 'badge-visible' : 'badge-hidden'}`}>
+                      {type.active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td className="table-cell text-gray-600">
+                    {new Date(type.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="table-cell">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleTypeEdit(type)}
+                        className="text-purple-600 hover:text-purple-800 transition-colors"
+                        title="Edit Type"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleTypeDelete(type.id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                        title="Delete Type"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {visibilityTypes.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="text-center py-12 text-gray-500">
+                    No visibility types found. Create your first type to get started.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Visibility Rules Table */}
       <div className="table-container">
         <div className="table-header">
