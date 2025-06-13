@@ -312,12 +312,14 @@ const CategoryPricingModels = ({ API, onBack }) => {
         </div>
       </div>
 
-      {/* Modal Placeholder */}
+      {/* Modal for Add/Edit Pricing Model */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Add Pricing Model</h3>
+              <h3 className="text-xl font-bold text-gray-900">
+                {editingModel ? 'Edit Pricing Model' : 'Add New Pricing Model'}
+              </h3>
               <button
                 onClick={() => setShowModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -327,12 +329,107 @@ const CategoryPricingModels = ({ API, onBack }) => {
                 </svg>
               </button>
             </div>
-            <div className="text-center py-8">
-              <p className="text-gray-600">Pricing model creation form will be available soon.</p>
-              <button onClick={() => setShowModal(false)} className="btn-primary mt-4">
-                Close
-              </button>
-            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Model Name *
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="form-input"
+                  placeholder="Enter pricing model name"
+                  required
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                  Enter a unique name for the pricing model
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description (Optional)
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="form-textarea"
+                  rows="3"
+                  placeholder="Enter description for this pricing model"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    className="form-input"
+                    placeholder="0.00"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                  <select
+                    value={formData.currency}
+                    onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                    className="form-select"
+                  >
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                    <option value="CAD">CAD</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Interval</label>
+                  <select
+                    value={formData.interval}
+                    onChange={(e) => setFormData({ ...formData, interval: e.target.value })}
+                    className="form-select"
+                  >
+                    <option value="">Select interval</option>
+                    <option value="one-time">One-time</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.active}
+                    onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Active</span>
+                </label>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  {editingModel ? 'Update Model' : 'Create Model'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
