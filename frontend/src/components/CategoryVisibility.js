@@ -3,16 +3,24 @@ import axios from 'axios';
 
 const CategoryVisibility = ({ API, onBack }) => {
   const [visibilitySettings, setVisibilitySettings] = useState([]);
+  const [visibilityTypes, setVisibilityTypes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showTypeModal, setShowTypeModal] = useState(false);
   const [editingSetting, setEditingSetting] = useState(null);
+  const [editingType, setEditingType] = useState(null);
   const [formData, setFormData] = useState({
     category_id: '',
     visibility_status: 'visible',
     start_date: '',
     end_date: '',
     rules: {}
+  });
+  const [typeFormData, setTypeFormData] = useState({
+    name: '',
+    description: '',
+    active: true
   });
 
   useEffect(() => {
