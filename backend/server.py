@@ -534,6 +534,63 @@ async def delete_display_type(type_id: str):
         raise HTTPException(status_code=404, detail="Display type not found")
     return {"message": "Display type deleted successfully"}
 
+# Social Handles Routes
+@api_router.post("/social-handles", response_model=SocialHandle)
+async def create_social_handle(handle_data: SocialHandleCreate):
+    # Check for duplicates by name
+    existing_handle = await db.social_handles.find_one({"name": handle_data.name})
+    if existing_handle:
+        raise HTTPException(status_code=400, detail="Social handle with this name already exists")
+    
+    handle_dict = handle_data.dict()
+    handle_obj = SocialHandle(**handle_dict)
+    await db.social_handles.insert_one(handle_obj.dict())
+    return handle_obj
+
+@api_router.get("/social-handles", response_model=List[SocialHandle])
+async def get_social_handles():
+    handles = await db.social_handles.find().sort("created_at", -1).to_list(1000)
+    return [SocialHandle(**handle) for handle in handles]
+
+@api_router.get("/social-handles/{handle_id}", response_model=SocialHandle)
+async def get_social_handle(handle_id: str):
+    handle = await db.social_handles.find_one({"id": handle_id})
+    if not handle:
+        raise HTTPException(status_code=404, detail="Social handle not found")
+    return SocialHandle(**handle)
+
+@api_router.put("/social-handles/{handle_id}", response_model=SocialHandle)
+async def update_social_handle(handle_id: str, handle_data: SocialHandleUpdate):
+    # Check for duplicates by name if name is being updated
+    if handle_data.name:
+        existing_handle = await db.social_handles.find_one({
+            "name": handle_data.name,
+            "id": {"$ne": handle_id}
+        })
+        if existing_handle:
+            raise HTTPException(status_code=400, detail="Social handle with this name already exists")
+    
+    update_dict = {k: v for k, v in handle_data.dict().items() if v is not None}
+    update_dict["updated_at"] = datetime.utcnow()
+    
+    result = await db.social_handles.update_one(
+        {"id": handle_id}, 
+        {"$set": update_dict}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Social handle not found")
+    
+    updated_handle = await db.social_handles.find_one({"id": handle_id})
+    return SocialHandle(**updated_handle)
+
+@api_router.delete("/social-handles/{handle_id}")
+async def delete_social_handle(handle_id: str):
+    result = await db.social_handles.delete_one({"id": handle_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Social handle not found")
+    return {"message": "Social handle deleted successfully"}
+
 # Business Fields Routes
 @api_router.post("/business-fields", response_model=BusinessField)
 async def create_business_field(field_data: BusinessFieldCreate):
