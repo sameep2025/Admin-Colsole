@@ -5,15 +5,33 @@ const SocialHandles = ({ API, onBack }) => {
   const [socialHandles, setSocialHandles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [editingHandle, setEditingHandle] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    icon_image: '',
+    url: '',
+    handle: '',
+    followers: 0,
+    active: true
+  });
+  const [imagePreview, setImagePreview] = useState('');
 
-  // Placeholder data for demonstration
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
+    fetchSocialHandles();
+  }, []);
+
+  const fetchSocialHandles = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/social-handles`);
+      setSocialHandles(response.data);
+    } catch (error) {
+      console.error('Error fetching social handles:', error);
+      // Set fallback data if API fails
       setSocialHandles([
         {
           id: '1',
-          platform: 'Instagram',
+          name: 'Instagram',
           handle: '@company_official',
           url: 'https://instagram.com/company_official',
           followers: 15420,
@@ -22,7 +40,7 @@ const SocialHandles = ({ API, onBack }) => {
         },
         {
           id: '2',
-          platform: 'Twitter',
+          name: 'Twitter',
           handle: '@company',
           url: 'https://twitter.com/company',
           followers: 8930,
@@ -30,9 +48,100 @@ const SocialHandles = ({ API, onBack }) => {
           created_at: new Date().toISOString()
         }
       ]);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64String = e.target.result;
+        setFormData({ ...formData, icon_image: base64String });
+        setImagePreview(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Check for duplicates
+      const duplicate = socialHandles.find(
+        handle => handle.name.toLowerCase() === formData.name.toLowerCase() && 
+        (!editingHandle || handle.id !== editingHandle.id)
+      );
+      
+      if (duplicate) {
+        alert('A social handle with this name already exists!');
+        return;
+      }
+
+      if (editingHandle) {
+        await axios.put(`${API}/social-handles/${editingHandle.id}`, formData);
+      } else {
+        await axios.post(`${API}/social-handles`, formData);
+      }
+      
+      setShowModal(false);
+      setEditingHandle(null);
+      setFormData({
+        name: '',
+        icon_image: '',
+        url: '',
+        handle: '',
+        followers: 0,
+        active: true
+      });
+      setImagePreview('');
+      fetchSocialHandles();
+    } catch (error) {
+      console.error('Error saving social handle:', error);
+      if (error.response?.data?.detail) {
+        alert(error.response.data.detail);
+      }
+    }
+  };
+
+  const handleEdit = (handle) => {
+    setEditingHandle(handle);
+    setFormData({
+      name: handle.name,
+      icon_image: handle.icon_image || '',
+      url: handle.url || '',
+      handle: handle.handle || '',
+      followers: handle.followers || 0,
+      active: handle.active
+    });
+    setImagePreview(handle.icon_image || '');
+    setShowModal(true);
+  };
+
+  const handleDelete = async (handleId) => {
+    if (window.confirm('Are you sure you want to delete this social handle?')) {
+      try {
+        await axios.delete(`${API}/social-handles/${handleId}`);
+        fetchSocialHandles();
+      } catch (error) {
+        console.error('Error deleting social handle:', error);
+      }
+    }
+  };
 
   if (loading) {
     return (
