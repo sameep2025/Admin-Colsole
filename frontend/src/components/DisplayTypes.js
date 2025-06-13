@@ -120,34 +120,47 @@ const DisplayTypes = ({ API, onBack }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-3xl font-bold text-gray-900">Manage Display Types</h2>
           <p className="mt-2 text-gray-600">Configure how content and categories are displayed</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="btn-primary"
-        >
-          <svg className="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-          </svg>
-          Add Display Type
-        </button>
-      </div>
-
-      {/* Coming Soon Notice */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-2xl p-6">
-        <div className="flex items-center">
-          <svg className="w-8 h-8 text-indigo-600 mr-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
-          </svg>
-          <div>
-            <h3 className="text-lg font-semibold text-indigo-800">Feature Coming Soon</h3>
-            <p className="text-indigo-700">Display type management functionality is under development. This will include layout templates, responsive design options, and custom display configurations.</p>
-          </div>
+        <div className="flex space-x-3">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="btn-secondary"
+            >
+              <svg className="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+              </svg>
+              Back to Home
+            </button>
+          )}
+          <button
+            onClick={() => {
+              setEditingType(null);
+              setFormData({
+                name: '',
+                description: '',
+                type_category: '',
+                properties: {},
+                responsive: true,
+                active: true
+              });
+              setShowModal(true);
+            }}
+            className="btn-primary"
+          >
+            <svg className="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+            </svg>
+            Add Display Type
+          </button>
         </div>
       </div>
+
+      {/* Remove Coming Soon Notice */}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
