@@ -243,13 +243,17 @@ const BusinessFields = ({ API, onBack }) => {
     return category ? category.label : categoryId;
   };
 
+  const getFieldTemplate = (templateId) => {
+    return businessFields.find(field => field.id === templateId);
+  };
+
   const renderOverview = () => (
     <div className="space-y-6">
       {/* Header with Action Buttons */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-3xl font-bold text-gray-900">Manage Business Fields</h2>
-          <p className="mt-2 text-gray-600">Configure business-specific data fields and validation rules</p>
+          <p className="mt-2 text-gray-600">Configure business-specific data fields and manage field templates</p>
         </div>
         <div className="flex space-x-3">
           {onBack && (
@@ -276,7 +280,8 @@ const BusinessFields = ({ API, onBack }) => {
             onClick={() => {
               setSimpleFormData({
                 name: '',
-                selectedField: businessFields.length > 0 ? businessFields[0].id : ''
+                selectedField: businessFields.length > 0 ? businessFields[0].id : '',
+                value: ''
               });
               setShowSimpleModal(true);
             }}
@@ -300,8 +305,8 @@ const BusinessFields = ({ API, onBack }) => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium opacity-90">Total Fields</p>
-              <p className="text-2xl font-bold">{businessFields.length}</p>
+              <p className="text-sm font-medium opacity-90">Business Fields</p>
+              <p className="text-2xl font-bold">{businessFieldInstances.length}</p>
             </div>
           </div>
         </div>
@@ -315,7 +320,7 @@ const BusinessFields = ({ API, onBack }) => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium opacity-90">Active Fields</p>
-              <p className="text-2xl font-bold">{businessFields.filter(f => f.active).length}</p>
+              <p className="text-2xl font-bold">{businessFieldInstances.filter(f => f.active).length}</p>
             </div>
           </div>
         </div>
@@ -324,12 +329,12 @@ const BusinessFields = ({ API, onBack }) => {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium opacity-90">Required Fields</p>
-              <p className="text-2xl font-bold">{businessFields.filter(f => f.required).length}</p>
+              <p className="text-sm font-medium opacity-90">Field Templates</p>
+              <p className="text-2xl font-bold">{businessFields.length}</p>
             </div>
           </div>
         </div>
@@ -338,89 +343,144 @@ const BusinessFields = ({ API, onBack }) => {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium opacity-90">Categories</p>
-              <p className="text-2xl font-bold">{[...new Set(businessFields.map(f => f.category))].length}</p>
+              <p className="text-sm font-medium opacity-90">With Values</p>
+              <p className="text-2xl font-bold">{businessFieldInstances.filter(f => f.value && f.value.trim()).length}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Fields by Category */}
-      <div className="space-y-6">
-        {fieldCategories.map((category) => {
-          const categoryFields = businessFields.filter(field => field.category === category.value);
-          if (categoryFields.length === 0) return null;
-          
-          return (
-            <div key={category.value} className="bg-white rounded-2xl shadow-lg border border-purple-100">
-              <div className={`px-6 py-4 border-b border-purple-100 bg-gradient-to-r from-${getCategoryColor(category.value)}-50 to-${getCategoryColor(category.value)}-100`}>
-                <div className="flex items-center justify-between">
-                  <h3 className={`text-lg font-semibold text-${getCategoryColor(category.value)}-800`}>{category.label}</h3>
-                  <span className="badge badge-visible">
-                    {categoryFields.length} fields
-                  </span>
-                </div>
-              </div>
-              
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {categoryFields.map((field) => (
-                    <div key={field.id} className="border border-purple-100 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-gray-900">{field.name}</h4>
-                        <div className="flex space-x-2">
-                          {field.required && (
-                            <span className="badge badge-private">Required</span>
-                          )}
-                          <span className={`badge ${field.active ? 'badge-visible' : 'badge-hidden'}`}>
-                            {field.active ? 'Active' : 'Inactive'}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Type:</span>
-                          <span className={`px-2 py-1 bg-${getCategoryColor(category.value)}-100 text-${getCategoryColor(category.value)}-700 rounded text-xs`}>
-                            {field.type}
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-600">Order:</span>
-                          <span className="font-medium">{field.order}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-end space-x-2 mt-3">
-                        <button
-                          onClick={() => handleEdit(field)}
-                          className="text-purple-600 hover:text-purple-800 transition-colors"
-                        >
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(field.id)}
-                          className="text-red-600 hover:text-red-800 transition-colors"
-                        >
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                          </svg>
-                        </button>
+      {/* Business Fields Instances */}
+      <div className="bg-white rounded-2xl shadow-lg border border-purple-100">
+        <div className="px-6 py-4 border-b border-purple-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-blue-800">Active Business Fields</h3>
+            <span className="badge badge-visible">
+              {businessFieldInstances.length} fields
+            </span>
+          </div>
+        </div>
+        
+        <div className="p-6">
+          {businessFieldInstances.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {businessFieldInstances.map((instance) => {
+                const template = getFieldTemplate(instance.template_field_id);
+                return (
+                  <div key={instance.id} className="border border-purple-100 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-gray-900">{instance.name}</h4>
+                      <div className="flex space-x-2">
+                        <span className={`badge ${instance.active ? 'badge-visible' : 'badge-hidden'}`}>
+                          {instance.active ? 'Active' : 'Inactive'}
+                        </span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600">Template:</span>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
+                          {template ? template.name : 'Unknown'}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600">Type:</span>
+                        <span className="font-medium">{template ? template.type : 'N/A'}</span>
+                      </div>
+
+                      {instance.value && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Value:</span>
+                          <span className="font-medium text-green-700 truncate max-w-32">{instance.value}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex justify-end space-x-2 mt-3">
+                      <button
+                        onClick={() => handleInstanceEdit(instance)}
+                        className="text-purple-600 hover:text-purple-800 transition-colors"
+                        title="Edit Business Field"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleInstanceDelete(instance.id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                        title="Delete Business Field"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>No business fields created yet. Click "Add new Business Fields" to get started.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Field Templates Section */}
+      <div className="bg-white rounded-2xl shadow-lg border border-purple-100">
+        <div className="px-6 py-4 border-b border-purple-100 bg-gradient-to-r from-green-50 to-emerald-50">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-green-800">Field Templates (Manage Fields)</h3>
+            <div className="flex space-x-2">
+              <span className="badge badge-visible">
+                {businessFields.length} templates
+              </span>
+              <button
+                onClick={() => setActiveView('manage')}
+                className="text-sm text-green-700 hover:text-green-900 underline"
+              >
+                View All →
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="p-6">
+          {businessFields.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {businessFields.slice(0, 6).map((field) => (
+                <div key={field.id} className="border border-green-100 rounded-lg p-3">
+                  <h4 className="font-medium text-gray-900 text-sm">{field.name}</h4>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                      {field.type}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {getCategoryName(field.category)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {businessFields.length > 6 && (
+                <div className="border border-green-100 rounded-lg p-3 flex items-center justify-center">
+                  <span className="text-sm text-gray-500">+{businessFields.length - 6} more templates</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>No field templates created yet. Use "Manage Fields" to create templates first.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
