@@ -26,6 +26,7 @@ const CategoryVisibility = ({ API, onBack }) => {
   useEffect(() => {
     fetchVisibilitySettings();
     fetchCategories();
+    fetchVisibilityTypes();
   }, []);
 
   const fetchVisibilitySettings = async () => {
@@ -45,6 +46,16 @@ const CategoryVisibility = ({ API, onBack }) => {
       setCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchVisibilityTypes = async () => {
+    try {
+      const response = await axios.get(`${API}/visibility-types`);
+      setVisibilityTypes(response.data);
+    } catch (error) {
+      console.error('Error fetching visibility types:', error);
+      setVisibilityTypes([]);
     }
   };
 
