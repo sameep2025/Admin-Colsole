@@ -626,8 +626,8 @@ const BusinessFields = ({ API, onBack }) => {
       {activeView === 'overview' && renderOverview()}
       {activeView === 'manage' && renderManageFields()}
 
-      {/* Modal for Add/Edit Field */}
-      {showModal && (
+      {/* Modal for Add/Edit Field Template */}
+      {showModal && !editingInstance && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
