@@ -118,6 +118,39 @@ class CategoryVisibilityUpdate(BaseModel):
     end_date: Optional[datetime] = None
     rules: Optional[Dict[str, Any]] = None
 
+class BusinessField(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    type: FieldType = FieldType.TEXT
+    required: bool = False
+    category: str = "general"
+    order: int = 0
+    validation: Dict[str, Any] = {}
+    options: Optional[List[str]] = None
+    active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class BusinessFieldCreate(BaseModel):
+    name: str
+    type: FieldType = FieldType.TEXT
+    required: bool = False
+    category: str = "general"
+    order: int = 0
+    validation: Dict[str, Any] = {}
+    options: Optional[List[str]] = None
+    active: bool = True
+
+class BusinessFieldUpdate(BaseModel):
+    name: Optional[str] = None
+    type: Optional[FieldType] = None
+    required: Optional[bool] = None
+    category: Optional[str] = None
+    order: Optional[int] = None
+    validation: Optional[Dict[str, Any]] = None
+    options: Optional[List[str]] = None
+    active: Optional[bool] = None
+
 # Category Model Routes
 @api_router.post("/category-models", response_model=CategoryModel)
 async def create_category_model(model_data: CategoryModelCreate):
