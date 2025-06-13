@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const CategoryVisibility = ({ API }) => {
+const CategoryVisibility = ({ API, onBack }) => {
   const [visibilitySettings, setVisibilitySettings] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
