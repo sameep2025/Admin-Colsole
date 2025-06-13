@@ -321,6 +321,49 @@ async def delete_category_visibility(visibility_id: str):
         raise HTTPException(status_code=404, detail="Category visibility setting not found")
     return {"message": "Category visibility setting deleted successfully"}
 
+# Visibility Types Routes
+@api_router.post("/visibility-types", response_model=VisibilityType)
+async def create_visibility_type(type_data: VisibilityTypeCreate):
+    type_dict = type_data.dict()
+    type_obj = VisibilityType(**type_dict)
+    await db.visibility_types.insert_one(type_obj.dict())
+    return type_obj
+
+@api_router.get("/visibility-types", response_model=List[VisibilityType])
+async def get_visibility_types():
+    types = await db.visibility_types.find().sort("created_at", -1).to_list(1000)
+    return [VisibilityType(**type_item) for type_item in types]
+
+@api_router.get("/visibility-types/{type_id}", response_model=VisibilityType)
+async def get_visibility_type(type_id: str):
+    type_item = await db.visibility_types.find_one({"id": type_id})
+    if not type_item:
+        raise HTTPException(status_code=404, detail="Visibility type not found")
+    return VisibilityType(**type_item)
+
+@api_router.put("/visibility-types/{type_id}", response_model=VisibilityType)
+async def update_visibility_type(type_id: str, type_data: VisibilityTypeUpdate):
+    update_dict = {k: v for k, v in type_data.dict().items() if v is not None}
+    update_dict["updated_at"] = datetime.utcnow()
+    
+    result = await db.visibility_types.update_one(
+        {"id": type_id}, 
+        {"$set": update_dict}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Visibility type not found")
+    
+    updated_type = await db.visibility_types.find_one({"id": type_id})
+    return VisibilityType(**updated_type)
+
+@api_router.delete("/visibility-types/{type_id}")
+async def delete_visibility_type(type_id: str):
+    result = await db.visibility_types.delete_one({"id": type_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Visibility type not found")
+    return {"message": "Visibility type deleted successfully"}
+
 # Business Fields Routes
 @api_router.post("/business-fields", response_model=BusinessField)
 async def create_business_field(field_data: BusinessFieldCreate):
