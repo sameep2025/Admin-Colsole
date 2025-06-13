@@ -523,6 +523,315 @@ class CategoryManagementSystemTest(unittest.TestCase):
         print("Verified parent-child relationship")
 
 
+# Business Fields API Tests
+class BusinessFieldsAPITest(unittest.TestCase):
+    """Test suite for the Business Fields API."""
+
+    def setUp(self):
+        """Set up test fixtures before each test method."""
+        # Check if the API is healthy
+        response = requests.get(f"{API_URL}/health")
+        self.assertEqual(response.status_code, 200)
+        health_data = response.json()
+        self.assertEqual(health_data["status"], "healthy")
+        print("API health check passed")
+
+        # Test data for business fields with different types
+        self.business_field_data = {
+            "name": "Company Name",
+            "type": "text",
+            "required": True,
+            "category": "basic_info",
+            "order": 1,
+            "validation": {
+                "min_length": 2,
+                "max_length": 100
+            },
+            "active": True
+        }
+
+        # Store created resources for cleanup
+        self.created_fields = []
+
+    def tearDown(self):
+        """Clean up after each test method."""
+        # Delete created business fields
+        for field_id in self.created_fields:
+            try:
+                requests.delete(f"{API_URL}/business-fields/{field_id}")
+            except Exception as e:
+                print(f"Error deleting business field {field_id}: {e}")
+
+    def test_01_business_field_creation(self):
+        """Test creating business fields with different types."""
+        print("\n=== Testing Business Field Creation with Different Types ===")
+        
+        # Test creating fields with different types
+        field_types = ["text", "number", "boolean", "date", "email", "url", "textarea"]
+        
+        for i, field_type in enumerate(field_types):
+            field_data = self.business_field_data.copy()
+            field_data["name"] = f"Test Field {field_type.capitalize()}"
+            field_data["type"] = field_type
+            field_data["order"] = i + 1
+            
+            response = requests.post(f"{API_URL}/business-fields", json=field_data)
+            self.assertEqual(response.status_code, 200)
+            field = response.json()
+            self.assertIsNotNone(field["id"])
+            self.assertEqual(field["name"], field_data["name"])
+            self.assertEqual(field["type"], field_type)
+            self.created_fields.append(field["id"])
+            print(f"Created {field_type} field with ID: {field['id']}")
+        
+        # Verify all fields were created
+        response = requests.get(f"{API_URL}/business-fields")
+        self.assertEqual(response.status_code, 200)
+        fields = response.json()
+        self.assertGreaterEqual(len(fields), len(field_types))
+        print(f"Retrieved {len(fields)} business fields")
+
+    def test_02_business_field_categories(self):
+        """Test business fields with different categories."""
+        print("\n=== Testing Business Field Categories ===")
+        
+        # Test creating fields with different categories
+        categories = ["general", "basic_info", "legal_info", "financial_info", "contact_info"]
+        
+        for i, category in enumerate(categories):
+            field_data = self.business_field_data.copy()
+            field_data["name"] = f"Test Field {category.capitalize()}"
+            field_data["category"] = category
+            field_data["order"] = i + 1
+            
+            response = requests.post(f"{API_URL}/business-fields", json=field_data)
+            self.assertEqual(response.status_code, 200)
+            field = response.json()
+            self.assertIsNotNone(field["id"])
+            self.assertEqual(field["category"], category)
+            self.created_fields.append(field["id"])
+            print(f"Created field with category '{category}' and ID: {field['id']}")
+        
+        # Verify fields with different categories
+        response = requests.get(f"{API_URL}/business-fields")
+        self.assertEqual(response.status_code, 200)
+        fields = response.json()
+        
+        # Check if we have at least one field for each category
+        categories_found = set()
+        for field in fields:
+            categories_found.add(field["category"])
+        
+        for category in categories:
+            self.assertIn(category, categories_found)
+        
+        print(f"Verified fields with categories: {', '.join(categories_found)}")
+
+    def test_03_business_field_validation(self):
+        """Test validation for business fields."""
+        print("\n=== Testing Business Field Validation ===")
+        
+        # Test required fields
+        required_field = self.business_field_data.copy()
+        required_field["name"] = "Required Field"
+        required_field["required"] = True
+        
+        response = requests.post(f"{API_URL}/business-fields", json=required_field)
+        self.assertEqual(response.status_code, 200)
+        field_id = response.json()["id"]
+        self.created_fields.append(field_id)
+        print(f"Created required field with ID: {field_id}")
+        
+        # Test field with validation rules
+        validation_field = self.business_field_data.copy()
+        validation_field["name"] = "Email with Validation"
+        validation_field["type"] = "email"
+        validation_field["validation"] = {
+            "pattern": "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$"
+        }
+        
+        response = requests.post(f"{API_URL}/business-fields", json=validation_field)
+        self.assertEqual(response.status_code, 200)
+        field_id = response.json()["id"]
+        self.created_fields.append(field_id)
+        print(f"Created field with validation rules and ID: {field_id}")
+        
+        # Test field with options (for dropdown/select fields)
+        options_field = self.business_field_data.copy()
+        options_field["name"] = "Field with Options"
+        options_field["options"] = ["Option 1", "Option 2", "Option 3"]
+        
+        response = requests.post(f"{API_URL}/business-fields", json=options_field)
+        self.assertEqual(response.status_code, 200)
+        field_id = response.json()["id"]
+        self.created_fields.append(field_id)
+        self.assertEqual(response.json()["options"], options_field["options"])
+        print(f"Created field with options and ID: {field_id}")
+        
+        # Test invalid field type
+        invalid_field = self.business_field_data.copy()
+        invalid_field["type"] = "invalid_type"  # Not in enum
+        
+        response = requests.post(f"{API_URL}/business-fields", json=invalid_field)
+        self.assertNotEqual(response.status_code, 200)
+        print("Validation correctly rejected invalid field type")
+
+    def test_04_business_field_ordering(self):
+        """Test field ordering and sorting."""
+        print("\n=== Testing Business Field Ordering ===")
+        
+        # Create fields with different order values
+        for i in range(5):
+            field_data = self.business_field_data.copy()
+            field_data["name"] = f"Ordered Field {5-i}"  # Reverse naming
+            field_data["order"] = i
+            
+            response = requests.post(f"{API_URL}/business-fields", json=field_data)
+            self.assertEqual(response.status_code, 200)
+            field_id = response.json()["id"]
+            self.created_fields.append(field_id)
+            print(f"Created field with order {i} and ID: {field_id}")
+        
+        # Get all fields and verify they are sorted by order
+        response = requests.get(f"{API_URL}/business-fields")
+        self.assertEqual(response.status_code, 200)
+        fields = response.json()
+        
+        # Check if fields are sorted by order
+        for i in range(1, len(fields)):
+            if fields[i-1]["order"] > fields[i]["order"]:
+                self.fail(f"Fields not sorted by order: {fields[i-1]['order']} > {fields[i]['order']}")
+        
+        print("Verified fields are sorted by order")
+
+    def test_05_business_field_crud_operations(self):
+        """Test all CRUD operations for business fields."""
+        print("\n=== Testing Business Field CRUD Operations ===")
+        
+        # Create a business field
+        response = requests.post(f"{API_URL}/business-fields", json=self.business_field_data)
+        self.assertEqual(response.status_code, 200)
+        field = response.json()
+        self.assertIsNotNone(field["id"])
+        self.assertEqual(field["name"], self.business_field_data["name"])
+        field_id = field["id"]
+        self.created_fields.append(field_id)
+        print(f"Created business field with ID: {field_id}")
+        
+        # Get all business fields
+        response = requests.get(f"{API_URL}/business-fields")
+        self.assertEqual(response.status_code, 200)
+        fields = response.json()
+        self.assertIsInstance(fields, list)
+        self.assertGreaterEqual(len(fields), 1)
+        print(f"Retrieved {len(fields)} business fields")
+        
+        # Get a specific business field
+        response = requests.get(f"{API_URL}/business-fields/{field_id}")
+        self.assertEqual(response.status_code, 200)
+        retrieved_field = response.json()
+        self.assertEqual(retrieved_field["id"], field_id)
+        self.assertEqual(retrieved_field["name"], self.business_field_data["name"])
+        print(f"Retrieved business field with ID: {field_id}")
+        
+        # Update a business field
+        update_data = {
+            "name": "Updated Business Field",
+            "required": False,
+            "category": "legal_info",
+            "validation": {
+                "min_length": 5,
+                "max_length": 200
+            }
+        }
+        response = requests.put(f"{API_URL}/business-fields/{field_id}", json=update_data)
+        self.assertEqual(response.status_code, 200)
+        updated_field = response.json()
+        self.assertEqual(updated_field["name"], update_data["name"])
+        self.assertEqual(updated_field["category"], update_data["category"])
+        print(f"Updated business field with ID: {field_id}")
+        
+        # Delete a business field
+        field_to_delete = self.business_field_data.copy()
+        field_to_delete["name"] = "Field to Delete"
+        response = requests.post(f"{API_URL}/business-fields", json=field_to_delete)
+        self.assertEqual(response.status_code, 200)
+        delete_id = response.json()["id"]
+        
+        response = requests.delete(f"{API_URL}/business-fields/{delete_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["message"], "Business field deleted successfully")
+        print(f"Deleted business field with ID: {delete_id}")
+        
+        # Verify deletion
+        response = requests.get(f"{API_URL}/business-fields/{delete_id}")
+        self.assertEqual(response.status_code, 404)
+        print("Verified deletion of business field")
+
+    def test_06_business_field_error_handling(self):
+        """Test error handling for business fields API."""
+        print("\n=== Testing Business Field Error Handling ===")
+        
+        # Test getting non-existent field
+        non_existent_id = str(uuid.uuid4())
+        response = requests.get(f"{API_URL}/business-fields/{non_existent_id}")
+        self.assertEqual(response.status_code, 404)
+        print("Correctly returned 404 for non-existent business field")
+        
+        # Test updating non-existent field
+        update_data = {"name": "Updated Name"}
+        response = requests.put(f"{API_URL}/business-fields/{non_existent_id}", json=update_data)
+        self.assertEqual(response.status_code, 404)
+        print("Correctly returned 404 when updating non-existent business field")
+        
+        # Test deleting non-existent field
+        response = requests.delete(f"{API_URL}/business-fields/{non_existent_id}")
+        self.assertEqual(response.status_code, 404)
+        print("Correctly returned 404 when deleting non-existent business field")
+        
+        # Test creating field with missing required fields
+        invalid_field = {}  # Missing name and other required fields
+        response = requests.post(f"{API_URL}/business-fields", json=invalid_field)
+        self.assertNotEqual(response.status_code, 200)
+        print("Correctly rejected field creation with missing required fields")
+
+    def test_07_business_field_activation(self):
+        """Test field activation/deactivation."""
+        print("\n=== Testing Business Field Activation/Deactivation ===")
+        
+        # Create an active field
+        active_field = self.business_field_data.copy()
+        active_field["name"] = "Active Field"
+        active_field["active"] = True
+        
+        response = requests.post(f"{API_URL}/business-fields", json=active_field)
+        self.assertEqual(response.status_code, 200)
+        field_id = response.json()["id"]
+        self.created_fields.append(field_id)
+        self.assertTrue(response.json()["active"])
+        print(f"Created active field with ID: {field_id}")
+        
+        # Deactivate the field
+        update_data = {"active": False}
+        response = requests.put(f"{API_URL}/business-fields/{field_id}", json=update_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()["active"])
+        print(f"Deactivated field with ID: {field_id}")
+        
+        # Verify the field is deactivated
+        response = requests.get(f"{API_URL}/business-fields/{field_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()["active"])
+        print("Verified field is deactivated")
+        
+        # Reactivate the field
+        update_data = {"active": True}
+        response = requests.put(f"{API_URL}/business-fields/{field_id}", json=update_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["active"])
+        print(f"Reactivated field with ID: {field_id}")
+
+
 if __name__ == "__main__":
     # Run the tests
     unittest.main(argv=['first-arg-is-ignored'], exit=False)
