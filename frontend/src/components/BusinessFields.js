@@ -107,6 +107,41 @@ const BusinessFields = ({ API, onBack }) => {
     }
   };
 
+  const handleSimpleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Find the selected field to copy its properties
+      const selectedField = businessFields.find(field => field.id === simpleFormData.selectedField);
+      if (!selectedField) {
+        alert('Please select a field template');
+        return;
+      }
+
+      // Create new field based on selected field template but with new name
+      const newFieldData = {
+        name: simpleFormData.name,
+        type: selectedField.type,
+        required: selectedField.required,
+        category: selectedField.category,
+        order: businessFields.length + 1,
+        validation: selectedField.validation || {},
+        options: selectedField.options || [],
+        active: true
+      };
+
+      await axios.post(`${API}/business-fields`, newFieldData);
+      
+      setShowSimpleModal(false);
+      setSimpleFormData({
+        name: '',
+        selectedField: ''
+      });
+      fetchBusinessFields();
+    } catch (error) {
+      console.error('Error saving business field:', error);
+    }
+  };
+
   const handleEdit = (field) => {
     setEditingField(field);
     setFormData({
