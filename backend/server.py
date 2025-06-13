@@ -166,6 +166,33 @@ class PricingModelUpdate(BaseModel):
     features: Optional[List[str]] = None
     active: Optional[bool] = None
 
+class DisplayType(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: Optional[str] = None
+    type_category: Optional[str] = None  # grid, list, carousel, card, etc.
+    properties: Dict[str, Any] = {}
+    responsive: bool = True
+    active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class DisplayTypeCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    type_category: Optional[str] = None
+    properties: Dict[str, Any] = {}
+    responsive: bool = True
+    active: bool = True
+
+class DisplayTypeUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    type_category: Optional[str] = None
+    properties: Optional[Dict[str, Any]] = None
+    responsive: Optional[bool] = None
+    active: Optional[bool] = None
+
 class BusinessField(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
