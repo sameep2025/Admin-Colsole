@@ -123,34 +123,48 @@ const CategoryPricingModels = ({ API, onBack }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-3xl font-bold text-gray-900">Manage Category Pricing Models</h2>
           <p className="mt-2 text-gray-600">Configure pricing structures and subscription models</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="btn-primary"
-        >
-          <svg className="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-          </svg>
-          Add Pricing Model
-        </button>
-      </div>
-
-      {/* Coming Soon Notice */}
-      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6">
-        <div className="flex items-center">
-          <svg className="w-8 h-8 text-yellow-600 mr-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-          </svg>
-          <div>
-            <h3 className="text-lg font-semibold text-yellow-800">Feature Coming Soon</h3>
-            <p className="text-yellow-700">Category pricing models functionality is under development. This will include subscription management, one-time payments, and tiered pricing structures.</p>
-          </div>
+        <div className="flex space-x-3">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="btn-secondary"
+            >
+              <svg className="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+              </svg>
+              Back to Home
+            </button>
+          )}
+          <button
+            onClick={() => {
+              setEditingModel(null);
+              setFormData({
+                name: '',
+                description: '',
+                price: '',
+                currency: 'USD',
+                interval: '',
+                features: [],
+                active: true
+              });
+              setShowModal(true);
+            }}
+            className="btn-primary"
+          >
+            <svg className="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+            </svg>
+            Add Pricing Model
+          </button>
         </div>
       </div>
+
+      {/* Remove Coming Soon Notice */}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
