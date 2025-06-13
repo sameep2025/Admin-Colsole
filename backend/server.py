@@ -136,6 +136,36 @@ class VisibilityTypeUpdate(BaseModel):
     description: Optional[str] = None
     active: Optional[bool] = None
 
+class PricingModel(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: Optional[str] = None
+    price: Optional[float] = None
+    currency: str = "USD"
+    interval: Optional[str] = None  # monthly, yearly, one-time
+    features: List[str] = []
+    active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PricingModelCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price: Optional[float] = None
+    currency: str = "USD"
+    interval: Optional[str] = None
+    features: List[str] = []
+    active: bool = True
+
+class PricingModelUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    currency: Optional[str] = None
+    interval: Optional[str] = None
+    features: Optional[List[str]] = None
+    active: Optional[bool] = None
+
 class BusinessField(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
