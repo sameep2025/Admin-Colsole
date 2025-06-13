@@ -193,6 +193,33 @@ class DisplayTypeUpdate(BaseModel):
     responsive: Optional[bool] = None
     active: Optional[bool] = None
 
+class SocialHandle(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    icon_image: Optional[str] = None  # Base64 encoded image
+    url: Optional[str] = None
+    handle: Optional[str] = None
+    followers: int = 0
+    active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class SocialHandleCreate(BaseModel):
+    name: str
+    icon_image: Optional[str] = None
+    url: Optional[str] = None
+    handle: Optional[str] = None
+    followers: int = 0
+    active: bool = True
+
+class SocialHandleUpdate(BaseModel):
+    name: Optional[str] = None
+    icon_image: Optional[str] = None
+    url: Optional[str] = None
+    handle: Optional[str] = None
+    followers: Optional[int] = None
+    active: Optional[bool] = None
+
 class BusinessField(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
